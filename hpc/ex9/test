@@ -1,0 +1,129 @@
+[23bcs102@mepcolinux ex9]$cat pr1.c 
+#include <stdio.h>
+#include <omp.h>
+
+double f(double x) { return x * x; }
+
+int main() {
+    double a, b;
+    int n;
+
+    printf("Enter lower limit (a): ");
+    scanf("%lf", &a);
+    printf("Enter upper limit (b): ");
+    scanf("%lf", &b);
+    printf("Enter number of sub-intervals (n): ");
+    scanf("%d", &n);
+
+    double h = (b - a) / n;
+    double res_red = (f(a) + f(b)) / 2.0;
+    double res_crit = (f(a) + f(b)) / 2.0;
+
+    #pragma omp parallel for reduction(+:res_red)
+    for (int i = 1; i < n; i++) {
+        res_red += f(a + i * h);
+    }
+    res_red *= h;
+
+    #pragma omp parallel
+    {
+        double local = 0.0;
+        #pragma omp for
+        for (int i = 1; i < n; i++) {
+            local += f(a + i * h);
+        }
+        #pragma omp critical
+        res_crit += local;
+    }
+    res_crit *= h;
+
+    printf("Reduction: %f\nCritical: %f\n", res_red, res_crit);
+    return 0;
+}
+
+[23bcs102@mepcolinux ex9]$g++ -fopenmp pr1.c 
+[23bcs102@mepcolinux ex9]$./a.out 
+Enter lower limit (a): 2
+Enter upper limit (b): 3
+Enter number of sub-intervals (n): 5
+Reduction: 6.340000
+Critical: 6.340000
+[23bcs102@mepcolinux ex9]$./a.out 
+Enter lower limit (a): 1
+Enter upper limit (b): 7
+Enter number of sub-intervals (n): 5
+Reduction: 115.440000
+Critical: 115.440000
+[23bcs102@mepcolinux ex9]$cat pr2.c 
+#include <stdio.h>
+#include <omp.h>
+
+int main() {
+    int n, target, count = 0;
+
+    printf("Array size: ");
+    scanf("%d", &n);
+    int arr[n];
+
+    printf("Elements: ");
+    for (int i = 0; i < n; i++) scanf("%d", &arr[i]);
+
+    printf("Target: ");
+    scanf("%d", &target);
+
+    #pragma omp parallel for reduction(+:count)
+    for (int i = 0; i < n; i++) {
+        if (arr[i] > target) count++;
+    }
+
+    printf("Count: %d\n", count);
+    return 0;
+}
+
+[23bcs102@mepcolinux ex9]$g++ -fopenmp pr2.c 
+[23bcs102@mepcolinux ex9]$./a.out 
+Array size: 7
+Elements: 4 3 6 7 3 5 6
+Target: 3
+Count: 5
+[23bcs102@mepcolinux ex9]$./a.out 
+Array size: 10
+Elements: 4 6 8 3 2 4 33 44 11 5
+Target: 10
+Count: 3
+[23bcs102@mepcolinux ex9]$cat pr3.c 
+#include <stdio.h>
+#include <omp.h>
+
+int main() {
+    int n;
+
+    printf("Array size: ");
+    scanf("%d", &n);
+    int arr[n];
+
+    printf("Elements: ");
+    for (int i = 0; i < n; i++) scanf("%d", &arr[i]);
+
+    int max_val = arr[0];
+
+    #pragma omp parallel for reduction(max:max_val)
+    for (int i = 0; i < n; i++) {
+        if (arr[i] > max_val) max_val = arr[i];
+    }
+
+    printf("Max: %d\n", max_val);
+    return 0;
+}
+
+[23bcs102@mepcolinux ex9]$g++ -fopenmp pr3.c 
+[23bcs102@mepcolinux ex9]$./a.out 
+Array size: 10
+Elements: 45 2 77 34 12 90 33 22 11 90
+Max: 90
+[23bcs102@mepcolinux ex9]$./a.out 
+Array size: 5
+Elements: 6 5 3 2 1
+Max: 6
+[23bcs102@mepcolinux ex9]$
+

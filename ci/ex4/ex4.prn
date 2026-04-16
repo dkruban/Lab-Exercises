@@ -1,0 +1,212 @@
+Script started on Wed Mar  4 15:38:57 2026
+[23bcs102@mepcolinux ex4]$cat test 
+[23bcs102@mepcolinux ex4]$cat d1.py
+import math
+
+def safe_log2(x: float) -> float:
+    return math.log(x, 2) if x > 0 else 0.0
+
+def entropy(rows, target):
+    label_counts = {}
+    for row in rows:
+        y = row[target]
+        label_counts[y] = label_counts.get(y, 0) + 1
+
+    total = len(rows)
+    H = 0.0
+    probs = []
+    for c in label_counts.values():
+        p = c / total
+        probs.append(p)
+        H += -p * safe_log2(p)
+    return H, label_counts, probs
+
+def unique_values(rows, attr):
+    seen = set()
+    vals = []
+    for row in rows:
+        v = row[attr]
+        if v not in seen:
+            seen.add(v)
+            vals.append(v)
+    return vals
+
+def split_by_value(rows, attr):
+    groups = {}
+    for row in rows:
+        v = row[attr]
+        groups.setdefault(v, []).append(row)
+    return groups
+
+def step_by_step_report(rows, attributes, target):
+    n = len(rows)
+    H_S, label_counts, _ = entropy(rows, target)
+
+    print("\n" + "="*60)
+    print("INTERMEDIATE CALCULATION REPORT")
+    print("="*60)
+    print(f"Total examples: {n}")
+
+    labels_sorted = sorted(label_counts.keys())
+    parts = []
+    for L in labels_sorted:
+        c = label_counts.get(L, 0)
+        p = c / n
+        parts.append(f"-({c}/{n})*log2({c}/{n})")
+
+    print(f"Entropy H(S) = {' + '.join(parts)} = {H_S:.4f}")
+    print(f"Class counts: {', '.join([f'{L}={label_counts[L]}' for L in labels_sorted])}")
+    print("-" * 30)
+
+    ig_results = []
+
+    for attr in attributes:
+        print(f"\nEvaluating Attribute: {attr}")
+        groups = split_by_value(rows, attr)
+        weighted_terms = []
+        H_after = 0.0
+
+        for v in unique_values(rows, attr):
+            subset = groups[v]
+            n_v = len(subset)
+            H_v, counts_v, _ = entropy(subset, target)
+            weight = n_v / n
+            H_after += weight * H_v
+
+            # Detailed subset entropy expression
+            parts_v = []
+            for L in labels_sorted:
+                c = counts_v.get(L, 0)
+                if c > 0:
+                    parts_v.append(f"-({c}/{n_v})*log2({c}/{n_v})")
+
+            print(f"  Value '{v}': |S_v|={n_v} | Counts: {', '.join([f'{L}={counts_v.get(L,0)}' for L in labels_sorted])}")
+            if parts_v:
+                print(f"    H(S_{v}) = {' + '.join(parts_v)} = {H_v:.4f}")
+            else:
+                print(f"    H(S_{v}) = 0.0000")
+
+            weighted_terms.append(f"({n_v}/{n})*{H_v:.4f}")
+
+        print(f"  Sum of weighted entropies H(S|{attr}) = {' + '.join(weighted_terms)} = {H_after:.4f}")
+        IG = H_S - H_after
+        print(f"  RESULT: Information Gain IG(S, {attr}) = {H_S:.4f} - {H_after:.4f} = {IG:.4f}")
+        ig_results.append((attr, IG))
+
+    print("\n" + "="*40)
+    print("FINAL SUMMARY OF INFORMATION GAIN")
+    print("="*40)
+    for attr, IG in ig_results:
+        print(f"- {attr:15s} -> IG = {IG:.4f}")
+
+    best_attr, best_IG = max(ig_results, key=lambda x: x[1])
+    print(f"\nROOT NODE SELECTED: {best_attr}")
+    print(f"Highest Information Gain: {best_IG:.4f}")
+    print("="*40 + "\n")
+
+def loads_dataset_from_txt(filename):
+    data = []
+    with open(filename, "r") as f:
+        # filter(None, ...) handles the empty trailing lines on Linux
+        lines = list(filter(None, f.read().splitlines()))
+
+    headers = lines[0].split(",")
+    for line in lines[1:]:
+        line = line.strip()
+        if not line: continue
+        values = line.split(",")
+        if len(values) == len(headers):
+            row = {headers[i]: values[i] for i in range(len(headers))}
+            data.append(row)
+    return data, headers[:-1], headers[-1]
+
+if __name__ == "__main__":
+    filename = input("Enter dataset filename (e.g., data.txt): ").strip()
+    try:
+        data, attributes, target = loads_dataset_from_txt(filename)
+        if not data:
+            print("Error: No data found in file.")
+        else:
+            step_by_step_report(data, attributes, target)
+    except FileNotFoundError:
+        print(f"Error: File '{filename}' not found.")
+[23bcs102@mepcolinux ex4]$cat t_data.txt
+age,income,student,credit_rating,buys_computer
+middle_aged,medium,yes,fair,yes
+middle_aged,low,yes,excellent,yes
+middle_aged,low,yes,excellent,yes
+middle_aged,high,no,excellent,yes
+middle_aged,high,no,excellent,yes
+middle_aged,low,yes,excellent,yes
+senior,medium,no,fair,yes
+youth,medium,no,excellent,no
+senior,medium,yes,excellent,no
+senior,medium,no,excellent,no
+youth,low,yes,fair,yes
+youth,low,no,excellent,no
+senior,low,no,excellent,no
+middle_aged,medium,no,excellent,yes
+senior,low,no,excellent,no
+[23bcs102@mepcolinux ex4]$python3 d1.py
+Enter dataset filename (e.g., data.txt): t_data.txt
+
+============================================================
+INTERMEDIATE CALCULATION REPORT
+============================================================
+Total examples: 15
+Entropy H(S) = -(6/15)*log2(6/15) + -(9/15)*log2(9/15) = 0.9710
+Class counts: no=6, yes=9
+------------------------------
+
+Evaluating Attribute: age
+  Value 'middle_aged': |S_v|=7 | Counts: no=0, yes=7
+    H(S_middle_aged) = -(7/7)*log2(7/7) = 0.0000
+  Value 'senior': |S_v|=5 | Counts: no=4, yes=1
+    H(S_senior) = -(4/5)*log2(4/5) + -(1/5)*log2(1/5) = 0.7219
+  Value 'youth': |S_v|=3 | Counts: no=2, yes=1
+    H(S_youth) = -(2/3)*log2(2/3) + -(1/3)*log2(1/3) = 0.9183
+  Sum of weighted entropies H(S|age) = (7/15)*0.0000 + (5/15)*0.7219 + (3/15)*0.9183 = 0.4243
+  RESULT: Information Gain IG(S, age) = 0.9710 - 0.4243 = 0.5466
+
+Evaluating Attribute: income
+  Value 'medium': |S_v|=6 | Counts: no=3, yes=3
+    H(S_medium) = -(3/6)*log2(3/6) + -(3/6)*log2(3/6) = 1.0000
+  Value 'low': |S_v|=7 | Counts: no=3, yes=4
+    H(S_low) = -(3/7)*log2(3/7) + -(4/7)*log2(4/7) = 0.9852
+  Value 'high': |S_v|=2 | Counts: no=0, yes=2
+    H(S_high) = -(2/2)*log2(2/2) = 0.0000
+  Sum of weighted entropies H(S|income) = (6/15)*1.0000 + (7/15)*0.9852 + (2/15)*0.0000 = 0.8598
+  RESULT: Information Gain IG(S, income) = 0.9710 - 0.8598 = 0.1112
+
+Evaluating Attribute: student
+  Value 'yes': |S_v|=6 | Counts: no=1, yes=5
+    H(S_yes) = -(1/6)*log2(1/6) + -(5/6)*log2(5/6) = 0.6500
+  Value 'no': |S_v|=9 | Counts: no=5, yes=4
+    H(S_no) = -(5/9)*log2(5/9) + -(4/9)*log2(4/9) = 0.9911
+  Sum of weighted entropies H(S|student) = (6/15)*0.6500 + (9/15)*0.9911 = 0.8547
+  RESULT: Information Gain IG(S, student) = 0.9710 - 0.8547 = 0.1163
+
+Evaluating Attribute: credit_rating
+  Value 'fair': |S_v|=3 | Counts: no=0, yes=3
+    H(S_fair) = -(3/3)*log2(3/3) = 0.0000
+  Value 'excellent': |S_v|=12 | Counts: no=6, yes=6
+    H(S_excellent) = -(6/12)*log2(6/12) + -(6/12)*log2(6/12) = 1.0000
+  Sum of weighted entropies H(S|credit_rating) = (3/15)*0.0000 + (12/15)*1.0000 = 0.8000
+  RESULT: Information Gain IG(S, credit_rating) = 0.9710 - 0.8000 = 0.1710
+
+========================================
+FINAL SUMMARY OF INFORMATION GAIN
+========================================
+- age             -> IG = 0.5466
+- income          -> IG = 0.1112
+- student         -> IG = 0.1163
+- credit_rating   -> IG = 0.1710
+
+ROOT NODE SELECTED: age
+Highest Information Gain: 0.5466
+========================================
+
+[23bcs102@mepcolinux ex4]$exit
+exit
+
+Script done on Wed Mar  4 15:39:02 2026

@@ -1,0 +1,168 @@
+import java.util.Scanner;
+
+public class AffineCipher {
+    // Standard alphabet size
+    private static final int M = 26;
+
+    // GCD function to check if 'a' and 26 are coprime
+    private static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+
+    // Find Modular Multiplicative Inverse of 'a'
+    private static int getModInverse(int a) {
+        for (int x = 1; x < M; x++) {
+            if ((a * x) % M == 1) return x;
+        }
+        return -1;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter text (Letters only): ");
+        String text = sc.nextLine().toUpperCase();
+
+        System.out.print("Enter key 'a' (must be coprime with 26): ");
+        int a = sc.nextInt();
+        if (gcd(a, M) != 1) {
+            System.out.println("Error: 'a' and 26 are not coprime!");
+            return;
+        }
+
+        System.out.print("Enter key 'b': ");
+        int b = sc.nextInt();
+
+        // 1. Encryption Process
+        StringBuilder cipher = new StringBuilder();
+        System.out.println("\n--- ENCRYPTION STEPS ---");
+        for (char c : text.toCharArray()) {
+            if (Character.isLetter(c)) {
+                int x = c - 'A';
+                int encryptedPos = (a * x + b) % M;
+                char encryptedChar = (char) (encryptedPos + 'A');
+                cipher.append(encryptedChar);
+                System.out.printf("%c -> Index %d: (%d*%d + %d) %% 26 = %d -> %c\n", 
+                                  c, x, a, x, b, encryptedPos, encryptedChar);
+            }
+        }
+        System.out.println("Ciphertext: " + cipher);
+
+        // 2. Decryption Process
+        int aInv = getModInverse(a);
+        StringBuilder plain = new StringBuilder();
+        System.out.println("\n--- DECRYPTION STEPS ---");
+        System.out.println("Modular Inverse of a: " + aInv);
+
+        for (char c : cipher.toString().toCharArray()) {
+            int y = c - 'A';
+            // Logic to handle negative results in modulo
+            int decryptedPos = (aInv * (y - b)) % M;
+            if (decryptedPos < 0) decryptedPos += M;
+            
+            char decryptedChar = (char) (decryptedPos + 'A');
+            plain.append(decryptedChar);
+            System.out.printf("%c -> Index %d: %d*(%d - %d) %% 26 = %d -> %c\n", 
+                              c, y, aInv, y, b, decryptedPos, decryptedChar);
+        }
+        System.out.println("Decrypted Text: " + plain);
+        sc.close();
+    }
+}
+
+
+Enter text (Letters only): HELLO
+Enter key 'a' (must be coprime with 26): 5
+Enter key 'b': 8
+
+--- ENCRYPTION STEPS ---
+H -> Index 7: (5*7 + 8) % 26 = 17 -> R
+E -> Index 4: (5*4 + 8) % 26 = 2 -> C
+L -> Index 11: (5*11 + 8) % 26 = 11 -> L
+L -> Index 11: (5*11 + 8) % 26 = 11 -> L
+O -> Index 14: (5*14 + 8) % 26 = 0 -> A
+Ciphertext: RCLLA
+
+--- DECRYPTION STEPS ---
+Modular Inverse of a: 21
+R -> Index 17: 21*(17 - 8) % 26 = 7 -> H
+C -> Index 2: 21*(2 - 8) % 26 = 4 -> E
+L -> Index 11: 21*(11 - 8) % 26 = 11 -> L
+L -> Index 11: 21*(11 - 8) % 26 = 11 -> L
+A -> Index 0: 21*(0 - 8) % 26 = 14 -> O
+Decrypted Text: HELLO
+
+
+import java.util.Scanner;
+
+public class VigenereCipher {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter Plaintext: ");
+        String text = sc.nextLine().toUpperCase().replaceAll("[^A-Z]", "");
+
+        System.out.print("Enter Keyword: ");
+        String keyword = sc.next().toUpperCase();
+
+        // 1. Encryption
+        StringBuilder cipherText = new StringBuilder();
+        System.out.println("\n--- ENCRYPTION STEPS ---");
+        for (int i = 0, j = 0; i < text.length(); i++) {
+            char pChar = text.charAt(i);
+            char kChar = keyword.charAt(j % keyword.length());
+            
+            // Formula: Ei = (Pi + Ki) mod 26
+            int eIdx = (pChar - 'A' + (kChar - 'A')) % 26;
+            char eChar = (char) (eIdx + 'A');
+            cipherText.append(eChar);
+            
+            System.out.printf("%c + %c (Key) -> (%d + %d) %% 26 = %d -> %c\n", 
+                              pChar, kChar, (pChar-'A'), (kChar-'A'), eIdx, eChar);
+            j++; 
+        }
+        System.out.println("Final Ciphertext: " + cipherText);
+
+        // 2. Decryption
+        StringBuilder plainText = new StringBuilder();
+        System.out.println("\n--- DECRYPTION STEPS ---");
+        for (int i = 0, j = 0; i < cipherText.length(); i++) {
+            char cChar = cipherText.charAt(i);
+            char kChar = keyword.charAt(j % keyword.length());
+
+            // Formula: Di = (Ci - Ki + 26) mod 26
+            int dIdx = (cChar - kChar + 26) % 26;
+            char dChar = (char) (dIdx + 'A');
+            plainText.append(dChar);
+
+            System.out.printf("%c - %c (Key) -> (%d - %d + 26) %% 26 = %d -> %c\n", 
+                              cChar, kChar, (cChar-'A'), (kChar-'A'), dIdx, dChar);
+            j++;
+        }
+        System.out.println("Final Decrypted Text: " + plainText);
+        sc.close();
+    }
+}
+
+
+Enter Plaintext: HELLO
+Enter Keyword: KEY
+
+--- ENCRYPTION STEPS ---
+H + K (Key) -> (7 + 10) % 26 = 17 -> R
+E + E (Key) -> (4 + 4) % 26 = 8 -> I
+L + Y (Key) -> (11 + 24) % 26 = 9 -> J
+L + K (Key) -> (11 + 10) % 26 = 21 -> V
+O + E (Key) -> (14 + 4) % 26 = 18 -> S
+Final Ciphertext: RIJVS
+
+--- DECRYPTION STEPS ---
+R - K (Key) -> (17 - 10 + 26) % 26 = 7 -> H
+I - E (Key) -> (8 - 4 + 26) % 26 = 4 -> E
+J - Y (Key) -> (9 - 24 + 26) % 26 = 11 -> L
+V - K (Key) -> (21 - 10 + 26) % 26 = 11 -> L
+S - E (Key) -> (18 - 4 + 26) % 26 = 14 -> O
+Final Decrypted Text: HELLO
+
+
+

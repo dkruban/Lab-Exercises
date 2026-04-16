@@ -1,0 +1,79 @@
+
+?- 
+% c:/Users/Administrator/Desktop/arithe.pl compiled 0.00 sec, 14 clauses
+?- start.
+
+********** ARITHMETIC MENU **********
+1. Addition
+2. Subtraction
+3. Multiplication
+4. Division
+5. Modulus
+6. Power
+7. Exit
+Enter your choice (1-7): 1.
+Enter first number: |: 3.
+Enter second number: |: 4.
+Result: 3 + 4 = 7
+
+********** ARITHMETIC MENU **********
+1. Addition
+2. Subtraction
+3. Multiplication
+4. Division
+5. Modulus
+6. Power
+7. Exit
+Enter your choice (1-7): |: 2.
+Enter first number: |: 4.
+Enter second number: |: 5.
+Result: 4 - 5 = -1
+
+********** ARITHMETIC MENU **********
+1. Addition
+2. Subtraction
+3. Multiplication
+4. Division
+5. Modulus
+6. Power
+7. Exit
+Enter your choice (1-7): |: 3.
+Enter first number: |: 45.
+Enter second number: |: 34.
+Result: 45 * 34 = 1530
+
+********** ARITHMETIC MENU **********
+1. Addition
+2. Subtraction
+3. Multiplication
+4. Division
+5. Modulus
+6. Power
+7. Exit
+Enter your choice (1-7): |: 4.
+Enter first number: |: 3.
+Enter second number: |: 4.
+Result: 3 / 4 = 0.75
+
+********** ARITHMETIC MENU **********
+1. Addition
+2. Subtraction
+3. Multiplication
+4. Division
+5. Modulus
+6. Power
+7. Exit
+Enter your choice (1-7): |: 4.
+Enter first number: |: 1.
+Enter second number: |: 0.
+Error: Division by zero not allowed!
+
+********** ARITHMETIC MENU **********
+1. Addition
+2. Subtraction
+3. Multiplication
+4. Division
+5. Modulus
+6. Power
+7. Exit
+Enter your choice (1-7): |: 

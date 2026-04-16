@@ -1,0 +1,42 @@
+฀Warning:    Earlier definition at c:/users/administrator/desktop/tree.pl:14
+Warning:    Current predicate: parent/2
+Warning:    Use :- discontiguous gender/2. to suppress this message
+% c:/Users/Administrator/Desktop/tree.pl compiled 0.00 sec, 75 clauses
+?- mother(attingal_elaya_thampuran, sethu_parvathi_bayi).
+true.
+
+?- father(moolam_thirunal, prince_kerala_varma).
+true.
+
+?- sibling(chithira_thirunal, uthradom_thirunal).
+true.
+
+?- sibling(sethu_lakshmi_bayi, sethu_parvathi_bayi).
+true.
+
+?- sister(karthika_thirunal, chithira_thirunal).
+true.
+
+?- grandmother(sethu_parvathi_bayi, pooyam_thirunal).
+true.
+
+?- grandfather(moolam_thirunal, princess_arya_varma).
+true.
+
+?- uncle(uthradom_thirunal, karthika_thirunal).
+false.
+
+?- cousin(moolam_thirunal, shreekumar_varma).
+true.
+
+?- ancestor(attingal_elaya_thampuran, princess_saraswati_lakshmi).
+true .
+
+?- descendant(prince_rama_varma_iii, sethu_parvathi_bayi).
+true .
+
+?- generation(attingal_elaya_thampuran, 0).
+true .
+
+?- generation(chithira_thirunal, 4).
+false.

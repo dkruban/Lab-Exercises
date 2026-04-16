@@ -1,0 +1,426 @@
+[23bcs102@mepcolinux ex1]$cat p1.py
+class Graph:
+    def __init__(self):
+        self.adj = {}
+
+    def add_node(self, node):
+        if node not in self.adj:
+            self.adj[node] = []
+            print("Node added\n")
+        else:
+            print("Node already exists\n")
+
+    def delete_node(self, node):
+        if node in self.adj:
+            for i in self.adj:
+                self.adj[i] = [x for x in self.adj[i] if x[0] != node]
+            del self.adj[node]
+            print("Node deleted")
+        else:
+            print("Node not found")
+
+    def add_edge(self, n1, n2, cost):
+        if n1 in self.adj and n2 in self.adj:
+            self.adj[n1].append((n2, cost))
+            self.adj[n2].append((n1, cost))
+            print("Edge added")
+        else:
+            print("Both nodes must exist")
+
+    def delete_edge(self, n1, n2):
+        if n1 in self.adj and n2 in self.adj:
+            self.adj[n1] = [x for x in self.adj[n1] if x[0] != n2]
+            self.adj[n2] = [x for x in self.adj[n2] if x[0] != n1]
+            print("Edge deleted")
+        else:
+            print("Nodes not found")
+
+    def display(self):
+        print("\nAdjacency List:")
+        for i in self.adj:
+            print(i, "->", self.adj[i])
+
+def bfs(graph, start, goal):
+    if start not in graph.adj or goal not in graph.adj:
+        print("Start or Goal node not found")
+        return
+    visited = []
+    fringe = []
+    print("\n--- BFS Traversal Steps ---")
+    fringe.append(start)
+    while fringe:
+        current = fringe.pop(0)
+        print("\nDequeue:", current)
+        if current not in visited:
+            visited.append(current)
+            print("Visited:", visited)
+            if current == goal:
+                print("\nGoal node", goal, "found!")
+                print("Final Visited Order:", visited)
+                return
+            for i, _ in graph.adj[current]:
+                if i not in visited and i not in fringe:
+                    fringe.append(i)
+                    print("Enqueue:", i)
+            print("Fringe:", fringe)
+    print("\nGoal not found")
+    print("Visited order:", visited)
+
+def dfs(graph, start, goal):
+    if start not in graph.adj or goal not in graph.adj:
+        print("Start or Goal node not found")
+        return
+    visited = []
+    stack = [start]
+    print("\n--- DFS Traversal Steps ---")
+    while stack:
+        current = stack.pop()
+        print("Pop:", current)
+        if current not in visited:
+            visited.append(current)
+            print("Visited:", visited)
+            if current == goal:
+                print("\nGoal found")
+                print("Visited order:", visited)
+                return
+            neighbors = []
+            for i, _ in graph.adj[current]:
+                if i not in visited:
+                    neighbors.append(i)
+            stack.extend(reversed(neighbors))
+            print("Stack:", stack)
+    print("\nGoal not found")
+    print("Visited order:", visited)
+
+def ucs(graph, start, goal):
+    visited = []
+    queue = [(start, 0, [start])]
+    fringe = [start]
+    print("Initial fringe:", fringe)
+
+    while queue:
+        min_index = 0
+        for i in range(len(queue)):
+            if queue[i][1] < queue[min_index][1]:
+                min_index = i
+        current, cost, path = queue.pop(min_index)
+        print(current)
+        if current == goal:
+            print("Goal node found!")
+            print("Visited nodes:", visited + [current])
+            print("Final path:", path)
+            print("Total cost:", cost)
+            return
+        if current not in visited:
+            visited.append(current)
+            for i, c in graph.adj[current]:
+                if i not in visited:
+                    queue.append((i, cost + c, path + [i]))
+                    fringe.append(i)
+        print("Fringe after processing node", current, ":", fringe)
+
+    print("Goal node NOT found!")
+    print("Visited nodes:", visited)
+
+graph = Graph()
+
+n = int(input("Enter number of nodes: "))
+for _ in range(n):
+    graph.add_node(input("Enter node: "))
+
+e = int(input("Enter number of edges: "))
+for _ in range(e):
+    n1 = input("\n\nEnter node 1: ")
+    n2 = input("Enter node 2: ")
+    cost = int(input("Enter cost: "))
+    graph.add_edge(n1, n2, cost)
+
+while True:
+    print("\n1. Add Node")
+    print("2. Delete Node")
+    print("3. Add Edge")
+    print("4. Delete Edge")
+    print("5. Display Graph")
+    print("6. BFS")
+    print("7. DFS")
+    print("8. UCS")
+    print("9. Exit")
+    ch = int(input("Enter choice: "))
+    if ch == 1:
+        graph.add_node(input("Enter node: "))
+    elif ch == 2:
+        graph.delete_node(input("Enter node: "))
+    elif ch == 3:
+        n1 = input("Enter node 1: ")
+        n2 = input("Enter node 2: ")
+        cost = int(input("Enter cost: "))
+        graph.add_edge(n1, n2, cost)
+    elif ch == 4:
+        graph.delete_edge(input("Enter node 1: "), input("Enter node 2: "))
+    elif ch == 5:
+        graph.display()
+    elif ch == 6:
+        bfs(graph, input("Start node: "), input("Goal node: "))
+    elif ch == 7:
+        dfs(graph, input("Start node: "), input("Goal node: "))
+    elif ch == 8:
+        ucs(graph, input("Start node: "), input("Goal node: "))
+    elif ch == 9:
+        print("Exiting...")
+        break
+    else:
+        print("Invalid choice")
+
+
+[23bcs102@mepcolinux ex1]$python3 p1.py
+Enter number of nodes: 13
+        Enter node: A
+Node added
+        Enter node: B
+Node added
+        Enter node: C
+Node added
+        Enter node: D
+Node added
+        Enter node: E
+Node added
+        Enter node: F
+Node added
+        Enter node: ^CTraceback (most recent call last):
+  File "p1.py", line 128, in <module>
+    graph.add_node(input("\tEnter node: "))
+KeyboardInterrupt
+[23bcs102@mepcolinux ex1]$vi p1.py
+[23bcs102@mepcolinux ex1]$python3 p1.py
+Enter number of nodes: 13
+Enter node: A
+Node added
+
+Enter node: B
+Node added
+
+Enter node: C
+Node added
+
+Enter node: D
+Node added
+
+Enter node: E
+Node added
+
+Enter node: F
+Node added
+
+Enter node: G
+Node added
+
+Enter node: H
+Node added
+
+Enter node: I
+Node added
+
+Enter node: J
+Node added
+
+Enter node: K
+Node added
+
+Enter node: L
+Node added
+
+Enter node: M
+Node added
+
+Enter number of edges: 16
+
+
+Enter node 1: A
+Enter node 2: B
+Enter cost: 1
+Edge added
+
+
+Enter node 1: B
+Enter node 2: C
+Enter cost: 1
+Edge added
+
+
+Enter node 1: B
+Enter node 2: G
+Enter cost: 1
+Edge added
+
+
+Enter node 1: B
+Enter node 2: E
+Enter cost: 1
+Edge added
+
+
+Enter node 1: C
+Enter node 2: D
+Enter cost: 1
+Edge added
+
+
+Enter node 1: C
+Enter node 2: F
+Enter cost: 1
+Edge added
+
+
+Enter node 1: E
+Enter node 2: D
+Enter cost: 1
+Edge added
+
+
+Enter node 1: E
+Enter node 2: F
+Enter cost: 1
+Edge added
+
+
+Enter node 1: G
+Enter node 2: H
+Enter cost: 1
+Edge added
+
+
+Enter node 1: H
+Enter node 2: I
+Enter cost: 1
+Edge added
+
+
+Enter node 1: I
+Enter node 2: J
+Enter cost: 1
+Edge added
+
+
+Enter node 1: J
+Enter node 2: K
+Enter cost: 1
+Edge added
+
+
+Enter node 1: J
+Enter node 2: L
+Enter cost: 1
+Edge added
+
+
+Enter node 1: J
+Enter node 2: M
+Enter cost: 1
+Edge added
+
+
+Enter node 1: D
+Enter node 2: G
+Enter cost: 1
+Edge added
+
+
+Enter node 1: G
+Enter node 2: F
+Enter cost: 1
+Edge added
+
+1. Add Node
+2. Delete Node
+3. Add Edge
+4. Delete Edge
+5. Display Graph
+6. BFS
+7. DFS
+8. UCS
+9. Exit
+Enter choice: 6
+Start node: A
+Goal node: M
+
+--- BFS Traversal Steps ---
+
+Dequeue: A
+Visited: ['A']
+Enqueue: B
+Fringe: ['B']
+
+Dequeue: B
+Visited: ['A', 'B']
+Enqueue: C
+Enqueue: G
+Enqueue: E
+Fringe: ['C', 'G', 'E']
+
+Dequeue: C
+Visited: ['A', 'B', 'C']
+Enqueue: D
+Enqueue: F
+Fringe: ['G', 'E', 'D', 'F']
+
+Dequeue: G
+Visited: ['A', 'B', 'C', 'G']
+Enqueue: H
+Fringe: ['E', 'D', 'F', 'H']
+
+Dequeue: E
+Visited: ['A', 'B', 'C', 'G', 'E']
+Fringe: ['D', 'F', 'H']
+
+Dequeue: D
+Visited: ['A', 'B', 'C', 'G', 'E', 'D']
+Fringe: ['F', 'H']
+
+Dequeue: F
+Visited: ['A', 'B', 'C', 'G', 'E', 'D', 'F']
+Fringe: ['H']
+
+Dequeue: H
+Visited: ['A', 'B', 'C', 'G', 'E', 'D', 'F', 'H']
+Enqueue: I
+Fringe: ['I']
+
+Dequeue: I
+Visited: ['A', 'B', 'C', 'G', 'E', 'D', 'F', 'H', 'I']
+Enqueue: J
+Fringe: ['J']
+
+Dequeue: J
+Visited: ['A', 'B', 'C', 'G', 'E', 'D', 'F', 'H', 'I', 'J']
+Enqueue: K
+Enqueue: L
+Enqueue: M
+Fringe: ['K', 'L', 'M']
+
+Dequeue: K
+Visited: ['A', 'B', 'C', 'G', 'E', 'D', 'F', 'H', 'I', 'J', 'K']
+Fringe: ['L', 'M']
+
+Dequeue: L
+Visited: ['A', 'B', 'C', 'G', 'E', 'D', 'F', 'H', 'I', 'J', 'K', 'L']
+Fringe: ['M']
+
+Dequeue: M
+Visited: ['A', 'B', 'C', 'G', 'E', 'D', 'F', 'H', 'I', 'J', 'K', 'L', 'M']
+
+Goal node M found!
+Final Visited Order: ['A', 'B', 'C', 'G', 'E', 'D', 'F', 'H', 'I', 'J', 'K', 'L', 'M']
+
+1. Add Node
+2. Delete Node
+3. Add Edge
+4. Delete Edge
+5. Display Graph
+6. BFS
+7. DFS
+8. UCS
+9. Exit
+Enter choice: 9
+Exiting...
+[23bcs102@mepcolinux ex1]$
+

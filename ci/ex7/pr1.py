@@ -1,0 +1,224 @@
+print("Choose input mode:")
+print("1. Binary (0/1)")
+print("2. Bipolar (-1/1)")
+
+while True:
+    mode = input("Enter choice: ")
+    if mode in ['1', '2']:
+        break
+    print("Invalid input")
+
+# -------- STEP 2: NUMBER OF INPUTS --------
+n = int(input("Enter number of inputs: "))
+
+# -------- STEP 3: GENERATE PATTERNS (MANUAL) --------
+patterns = []
+
+def generate_patterns(current, index):
+    if index == n:
+        patterns.append(current[:])
+        return
+
+    if mode == "1":
+        values = [0, 1]
+    else:
+        values = [-1, 1]
+
+    for v in values:
+        current.append(v)
+        generate_patterns(current, index + 1)
+        current.pop()
+
+generate_patterns([], 0)
+
+# -------- STEP 4: LOGIC CHOICE --------
+print("\n1. AND")
+print("2. OR")
+print("3. AND-NOT (first 2 inputs only)")
+
+while True:
+    choice = input("Enter choice: ")
+    if choice in ['1', '2', '3']:
+        if choice == '3' and n < 2:
+            print("Need at least 2 inputs")
+        else:
+            break
+    print("Invalid")
+
+# -------- STEP 5: LOGIC FUNCTION --------
+def logic_function(x):
+    if choice == '1':
+        if mode == "1":
+            result = 1
+            for i in range(len(x)):
+                if x[i] == 0:
+                    result = 0
+            return result
+        else:
+            result = 1
+            for i in range(len(x)):
+                if x[i] == -1:
+                    result = -1
+            return result
+    elif choice == '2':
+        if mode == "1":
+            result = 0
+            for i in range(len(x)):
+                if x[i] == 1:
+                    result = 1
+            return result
+        else:
+            result = -1
+            for i in range(len(x)):
+                if x[i] == 1:
+                    result = 1
+            return result
+    elif choice == '3':
+        if mode == "1":
+            if x[0] == 1 and x[1] == 0:
+                return 1
+            else:
+                return 0
+        else:
+            return x[0] * (-x[1])
+
+# -------- STEP 6: TARGETS --------
+targets = []
+for i in range(len(patterns)):
+    targets.append(logic_function(patterns[i]))
+
+# -------- STEP 7: INITIALIZE --------
+W = []
+for i in range(n):
+    W.append(0)
+
+b = 0
+alpha = 1
+
+# -------- STEP 7.5: ASK THETA --------
+theta = float(input("Enter threshold (theta): "))
+
+# -------- STEP 8: ACTIVATION --------
+print("\n1. Binary Step")
+print("2. Bipolar Step")
+
+while True:
+    act = input("Enter choice: ")
+    if act in ['1', '2']:
+        break
+    print("Invalid")
+
+def activate(yin):
+    if act == '1':
+        if yin >= theta:
+            return 1
+        else:
+            return 0
+    else:
+        if yin >= theta:
+            return 1
+        else:
+            return -1
+
+# -------- STEP 9: TRAINING --------
+iteration = 1
+
+while True:
+    print("\n=== Iteration", iteration, "===")
+
+    # -------- BUILD HEADER --------
+    col_w = 8
+    header_cols = []
+    for j in range(n):
+        header_cols.append("x" + str(j + 1))
+    header_cols.append("t")
+    for j in range(n):
+        header_cols.append("w" + str(j + 1))
+    header_cols.append("b")
+    header_cols.append("yin")
+    header_cols.append("y")
+
+    header_str = ""
+    for col in header_cols:
+        header_str += "{:^{w}}".format(col, w=col_w)
+    print(header_str)
+    print("-" * (col_w * len(header_cols)))
+
+    error_found = False
+    rows_to_print = []
+
+    for i in range(len(patterns)):
+
+        x = patterns[i]
+        t = targets[i]
+
+        # -------- CALCULATE yin --------
+        yin = 0
+        for j in range(n):
+            yin = yin + W[j] * x[j]
+        yin = yin + b
+
+        # -------- ACTIVATION --------
+        y = activate(yin)
+
+        # -------- BUILD ROW --------
+        row_vals = []
+        for j in range(n):
+            row_vals.append(x[j])
+        row_vals.append(t)
+        for j in range(n):
+            row_vals.append(W[j])
+        row_vals.append(b)
+        row_vals.append(yin)
+        row_vals.append(y)
+
+        row_str = ""
+        for val in row_vals:
+            row_str += "{:^{w}}".format(val, w=col_w)
+        print(row_str)
+
+        # -------- UPDATE --------
+        if y != t:
+            error_found = True
+
+            if mode == "1":
+                if t == 1:
+                    t_val = 1
+                else:
+                    t_val = -1
+
+                x_val = []
+                for j in range(n):
+                    if x[j] == 0:
+                        x_val.append(-1)
+                    else:
+                        x_val.append(1)
+
+                for j in range(n):
+                    W[j] = W[j] + alpha * t_val * x_val[j]
+
+                b = b + alpha * t_val
+
+            else:
+                for j in range(n):
+                    W[j] = W[j] + alpha * t * x[j]
+
+                b = b + alpha * t
+
+    print("-" * (col_w * len(header_cols)))
+
+    if error_found == False:
+        print("\nTraining Complete!")
+        print("\nFinal Weights:")
+        final_str = ""
+        for j in range(n):
+            final_str += "  w" + str(j + 1) + " = " + str(W[j])
+        final_str += "  b = " + str(b)
+        print(final_str)
+        break
+
+    iteration = iteration + 1
+
+    if iteration > 50:
+        print("\nStopped (No convergence)")
+        break

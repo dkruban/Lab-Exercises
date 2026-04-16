@@ -1,0 +1,243 @@
+Script started on Sat Feb 21 16:18:10 2026
+[23bcs102@mepcolinux ex3]$cat ex3testcase 
+import java.util.Scanner;
+import java.util.Random;
+
+public class MillerRabinTest {
+
+    // Efficient modular exponentiation: (base^exp) % mod
+    private static long power(long base, long exp, long mod) {
+        long res = 1;
+        base %= mod;
+        while (exp > 0) {
+            if (exp % 2 == 1) res = multiplyMod(res, base, mod);
+            base = multiplyMod(base, base, mod);
+            exp /= 2;
+        }
+        return res;
+    }
+
+    // Prevents overflow during (a * b) % mod calculation
+    private static long multiplyMod(long a, long b, long mod) {
+        return (long) ((java.math.BigInteger.valueOf(a).multiply(
+                java.math.BigInteger.valueOf(b)).mod(
+                java.math.BigInteger.valueOf(mod))).longValue());
+    }
+
+    public static boolean isPrime(long n, int k) {
+        if (n < 2) return false;
+        if (n == 2 || n == 3) return true;
+        if (n % 2 == 0) return false;
+
+        // Step 1: Find d and r such that n - 1 = 2^r * d
+        long d = n - 1;
+        int r = 0;
+        while (d % 2 == 0) {
+            d /= 2;
+            r++;
+        }
+        System.out.println("Step 1: Decomposed " + (n-1) + " into 2^" + r + " * " + d);
+
+        Random rand = new Random();
+        for (int i = 0; i < k; i++) {
+            long a = 2 + (Math.abs(rand.nextLong()) % (n - 4));
+            System.out.println("\nIteration " + (i + 1) + ": Testing base a = " + a);
+            
+            if (!millerTest(n, a, d, r)) {
+                System.out.println("Result: Witness found! " + n + " is COMPOSITE.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean millerTest(long n, long a, long d, int r) {
+        long x = power(a, d, n);
+        System.out.println("  Initial x = a^d % n = " + x);
+        
+        if (x == 1 || x == n - 1) return true;
+
+        for (int i = 0; i < r - 1; i++) {
+            x = multiplyMod(x, x, n);
+            System.out.println("  Squaring step " + (i + 1) + ": x = " + x);
+            if (x == n - 1) return true;
+        }
+        return false;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter number to test: ");
+        long n = sc.nextLong();
+        System.out.print("Enter number of iterations (k): ");
+        int k = sc.nextInt();
+
+        if (isPrime(n, k)) System.out.println("\nFinal Result: " + n + " is PROBABLY PRIME.");
+        sc.close();
+    }
+}
+
+Enter number to test: 561
+Enter number of iterations (k): 1
+Step 1: Decomposed 560 into 2^4 * 35
+
+Iteration 1: Testing base a = 7
+  Initial x = 7^35 % 561 = 241
+  Squaring step 1: x = 298
+  Squaring step 2: x = 166
+  Squaring step 3: x = 67
+Result: Witness found! 561 is COMPOSITE.
+
+
+import java.util.Scanner;
+
+public class EuclideanAlgorithm {
+
+    // Basic Euclidean Algorithm (Recursive)
+    public static int findGCD(int a, int b) {
+        if (a == 0) return b;
+        System.out.println("Step: gcd(" + a + ", " + b + ") -> " + b + " % " + a + " = " + (b % a));
+        return findGCD(b % a, a);
+    }
+
+    // Extended Euclidean Algorithm
+    // Returns array [gcd, x, y]
+    public static int[] extendedGCD(int a, int b) {
+        if (a == 0) {
+            return new int[] { b, 0, 1 };
+        }
+        int[] vals = extendedGCD(b % a, a);
+        int gcd = vals[0];
+        int x1 = vals[1];
+        int y1 = vals[2];
+
+        // Update x and y using results of recursive call
+        int x = y1 - (b / a) * x1;
+        int y = x1;
+
+        System.out.printf("Backtrack: gcd=%d, x=%d, y=%d\n", gcd, x, y);
+        return new int[] { gcd, x, y };
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter first number (a): ");
+        int a = sc.nextInt();
+        System.out.print("Enter second number (b): ");
+        int b = sc.nextInt();
+
+        System.out.println("\n--- BASIC GCD STEPS ---");
+        int gcd = findGCD(a, b);
+        System.out.println("Final GCD: " + gcd);
+
+        System.out.println("\n--- EXTENDED GCD STEPS (Coefficients) ---");
+        int[] result = extendedGCD(a, b);
+        System.out.printf("\nEquation: (%d * %d) + (%d * %d) = %d\n", 
+                          a, result[1], b, result[2], result[0]);
+        
+        sc.close();
+    }
+}
+
+
+Enter first number (a): 48
+Enter second number (b): 18
+
+--- BASIC GCD STEPS ---
+Step: gcd(48, 18) -> 18 % 48 = 18
+Step: gcd(18, 48) -> 48 % 18 = 12
+Step: gcd(12, 18) -> 18 % 12 = 6
+Step: gcd(6, 12) -> 12 % 6 = 0
+Final GCD: 6
+
+--- EXTENDED GCD STEPS (Coefficients) ---
+Backtrack: gcd=6, x=1, y=0
+Backtrack: gcd=6, x=-1, y=1
+Backtrack: gcd=6, x=1, y=-1
+Backtrack: gcd=6, x=-2, y=1
+Backtrack: gcd=6, x=1, y=-2
+
+Equation: (48 * 1) + (18 * -2) = 6
+
+
+import java.util.*;
+
+public class PrimitiveRootFinder {
+    // Utility function for modular exponentiation: (base^exp) % mod
+    static long power(long base, long exp, long mod) {
+        long res = 1;
+        base %= mod;
+        while (exp > 0) {
+            if (exp % 2 == 1) res = (res * base) % mod;
+            base = (base * base) % mod;
+            exp /= 2;
+        }
+        return res;
+    }
+
+    // Finds unique prime factors of n
+    static void findFactors(Set<Integer> factors, int n) {
+        while (n % 2 == 0) {
+            factors.add(2);
+            n /= 2;
+        }
+        for (int i = 3; i <= Math.sqrt(n); i += 2) {
+            while (n % i == 0) {
+                factors.add(i);
+                n /= i;
+            }
+        }
+        if (n > 2) factors.add(n);
+    }
+
+    // Finds the smallest primitive root of prime n
+    static int findSmallestRoot(int n) {
+        if (n <= 1) return -1;
+        int phi = n - 1;
+        Set<Integer> factors = new HashSet<>();
+        findFactors(factors, phi);
+
+        for (int r = 2; r <= phi; r++) {
+            boolean isRoot = true;
+            for (int q : factors) {
+                // If r^(phi/q) % n == 1, then r is NOT a primitive root
+                if (power(r, phi / q, n) == 1) {
+                    isRoot = false;
+                    break;
+                }
+            }
+            if (isRoot) return r;
+        }
+        return -1;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter a prime number: ");
+        int n = sc.nextInt();
+
+        int root = findSmallestRoot(n);
+        if (root != -1) {
+            System.out.println("\nSmallest Primitive Root: " + root);
+            System.out.println("Powers of " + root + " mod " + n + ":");
+            for (int i = 1; i < n; i++) {
+                System.out.print(power(root, i, n) + " ");
+            }
+            System.out.println();
+        } else {
+            System.out.println("No primitive root found.");
+        }
+        sc.close();
+    }
+}
+
+Enter a prime number: 7
+
+Smallest Primitive Root: 3
+Powers of 3 mod 7:
+3 2 6 4 5 1  
+
+[23bcs102@mepcolinux ex3]$exit
+exit
+
+Script done on Sat Feb 21 16:18:16 2026
