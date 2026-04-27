@@ -1,9 +1,0 @@
-age,income,student,credit_rating,buys_computer
-middle_aged,medium,yes,fair,yes
-middle_aged,low,yes,excellent,yes
-middle_aged,low,yes,excellent,yes
-middle_aged,high,no,excellent,yes
-youth,medium,no,excellent,no
-senior,medium,yes,excellent,no
-senior,medium,no,excellent,no
-
