@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Miller–Rabin Primality Test</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<h2>Miller–Rabin Primality Test</h2>
+
+<label>Enter Number:</label>
+<input type="text" id="number" placeholder="Enter a large number">
+
+<label>Number of Iterations (k):</label>
+<input type="number" id="iterations" value="5">
+
+<br><br>
+<button onclick="checkPrime()">Check Primality</button>
+
+<h3>Intermediate Steps:</h3>
+<textarea id="result" rows="18" readonly></textarea>
+
+<h3>Result:</h3>
+<textarea id="result" readonly></textarea>
+
+<script src="script_miller_rabin.js"></script>
+</body>
+</html>

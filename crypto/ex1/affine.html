@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Affine Cipher</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<h2>Affine Cipher</h2>
+
+<label>Enter Text:</label>
+<textarea id="plainText"></textarea>
+
+<label>Enter Key a (coprime with 26):</label>
+<input type="number" id="a">
+
+<label>Enter Key b:</label>
+<input type="number" id="b">
+
+<br><br>
+<button onclick="encrypt()">Encrypt</button>
+<button onclick="decrypt()">Decrypt</button>
+
+<h3>Result:</h3>
+<textarea id="result" readonly></textarea>
+
+<script src="script_affine.js"></script>
+</body>
+</html>

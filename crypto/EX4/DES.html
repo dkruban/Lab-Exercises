@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DES Encryption / Decryption</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>DES Encryption / Decryption</h2>
+
+<label for="plain">Enter 64-bit Plaintext (binary):</label>
+<input type="text" id="plain" placeholder="e.g., 010101...">
+
+<label for="key">Enter 48-bit Key (binary):</label>
+<input type="text" id="key" placeholder="e.g., 110011...">
+
+<button onclick="encrypt()">Encrypt</button>
+<button onclick="decrypt()">Decrypt</button>
+
+<h3>Result:</h3>
+<textarea id="result" rows="6" readonly></textarea>
+
+<script>
+/* DES logic (simplified educational version) */
+function xor(a, b) {
+    let res = "";
+    for (let i = 0; i < a.length; i++)
+        res += (a[i] === b[i]) ? '0' : '1';
+    return res;
+}
+
+function fFunction(right, key) {
+    return xor(right, key.slice(0, right.length));
+}
+
+function encryptDES(plaintext, key) {
+    if (plaintext.length !== 64 || key.length !== 48) {
+        return "Invalid input lengths!";
+    }
+    let left = plaintext.slice(0, 32);
+    let right = plaintext.slice(32);
+    for (let i = 0; i < 16; i++) {
+        let newLeft = right;
+        let newRight = xor(left, fFunction(right, key));
+        left = newLeft;
+        right = newRight;
+    }
+    return right + left;
+}
+
+function decryptDES(ciphertext, key) {
+    if (ciphertext.length !== 64 || key.length !== 48) {
+        return "Invalid input lengths!";
+    }
+    let left = ciphertext.slice(0, 32);
+    let right = ciphertext.slice(32);
+    for (let i = 0; i < 16; i++) {
+        let newRight = left;
+        let newLeft = xor(right, fFunction(left, key));
+        right = newRight;
+        left = newLeft;
+    }
+    return left + right;
+}
+
+function encrypt() {
+    let p = document.getElementById("plain").value.trim();
+    let k = document.getElementById("key").value.trim();
+    document.getElementById("result").value = encryptDES(p, k);
+}
+
+function decrypt() {
+    let c = document.getElementById("result").value.trim();
+    let k = document.getElementById("key").value.trim();
+    document.getElementById("result").value = decryptDES(c, k);
+}
+</script>
+
+</body>
+</html>

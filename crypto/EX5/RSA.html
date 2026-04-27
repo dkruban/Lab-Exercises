@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>RSA Algorithm</title>
+
+<style>
+body{
+font-family:Arial;
+background:#f4f4f4;
+padding:40px;
+}
+
+.container{
+background:white;
+padding:20px;
+max-width:600px;
+margin:auto;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+input{
+width:100%;
+padding:8px;
+margin:8px 0;
+}
+
+button{
+padding:10px 20px;
+margin:10px 5px;
+}
+
+#output{
+margin-top:20px;
+background:#eee;
+padding:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>RSA Encryption / Decryption</h2>
+
+<label>Prime Number p:</label>
+<input id="p">
+
+<label>Prime Number q:</label>
+<input id="q">
+
+<label>Public Key e:</label>
+<input id="e">
+
+<label>Message (number):</label>
+<input id="msg">
+
+<button onclick="encrypt()">Encrypt</button>
+<button onclick="decrypt()">Decrypt</button>
+
+<div id="output"></div>
+
+</div>
+
+<script>
+  let cipher;
+  function gcd(a,b){
+    while(b!=0){
+      let t=b;
+      b=a%b;
+      a=t;
+    }
+    return a;
+  }
+  function modExp(base, exp, mod){
+    let result=1;
+    for(let i=0;i<exp;i++)
+      result=(result*base)%mod;
+    return result;
+  }
+  function findD(e,phi){
+    for(let d=1;d<phi;d++){
+      if((d*e)%phi==1){
+        return d;
+      }
+    }
+  }
+  function encrypt(){
+    let p=parseInt(document.getElementById("p").value);
+    let q=parseInt(document.getElementById("q").value);
+    let e=parseInt(document.getElementById("e").value);
+    let m=parseInt(document.getElementById("msg").value);
+    
+    let n=p*q;
+    let phi=(p-1)*(q-1);
+    
+    let d=findD(e,phi);
+    
+    cipher=modExp(m,e,n);
+    
+    document.getElementById("output").innerHTML=
+    "n = "+n+"<br>"+
+    "phi(n) = "+phi+"<br>"+
+    "Private Key d = "+d+"<br><br>"+
+    "Ciphertext = "+cipher;
+    
+    }
+
+    function decrypt(){
+      let p=parseInt(document.getElementById("p").value);
+      let q=parseInt(document.getElementById("q").value);
+      let e=parseInt(document.getElementById("e").value);
+      
+      let n=p*q;
+      let phi=(p-1)*(q-1);
+      
+      let d=findD(e,phi);
+      
+      let message=modExp(cipher,d,n);
+      
+      document.getElementById("output").innerHTML+="<br><br>Decrypted Message = "+message;
+    }
+
+</script>
+
+</body>
+</html>

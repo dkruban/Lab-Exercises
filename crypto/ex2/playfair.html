@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Playfair Cipher</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<h2>Playfair Cipher</h2>
+
+<label>Enter Key:</label>
+<input type="text" id="key">
+
+<label>Enter Text:</label>
+<textarea id="text" rows="4"></textarea>
+
+<button onclick="encryptText()">Encrypt</button>
+<button onclick="decryptText()">Decrypt</button>
+
+<h3>Result:</h3>
+<textarea id="result" rows="4" readonly></textarea>
+
+<div id="matrix"></div>
+
+<script src="script_playfair.js"></script>
+</body>
+</html>

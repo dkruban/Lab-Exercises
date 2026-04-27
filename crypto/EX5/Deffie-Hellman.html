@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Diffie-Hellman Key Exchange</title>
+<style>
+body{
+  font-family:Arial;
+  background:#f4f4f4;
+  padding:40px;
+}
+
+.container{
+  background:white;
+  padding:20px;
+  max-width:600px;
+  margin:auto;
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+input{
+  width:100%;
+  padding:8px;
+  margin:8px 0;
+}
+
+button{
+  padding:10px 20px;
+  margin-top:10px;
+}
+
+#output{
+  margin-top:20px;
+  background:#eee;
+  padding:10px;
+}
+</style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h2>Diffie-Hellman Key Exchange</h2>
+    <label>Prime Number (q):</label>
+    <input id="q">
+
+    <label>Primitive Root (α):</label>
+    <input id="alpha">
+
+    <label>User A Private Key (XA):</label>
+    <input id="xa">
+
+    <label>User B Private Key (XB):</label>
+    <input id="xb">
+
+    <button onclick="calculateDH()">Generate Shared Key</button>
+
+    <div id="output"></div>
+
+  </div>
+  <script>
+    function modExp(base, exp, mod){
+      let result = 1;
+      for(let i=0;i<exp;i++){
+        result = (result * base) % mod;
+      }
+      return result;
+    }
+    function calculateDH(){
+      let q = parseInt(document.getElementById("q").value);
+      let alpha = parseInt(document.getElementById("alpha").value);
+      let xa = parseInt(document.getElementById("xa").value);
+      let xb = parseInt(document.getElementById("xb").value);
+      let YA = modExp(alpha, xa, q);
+      let YB = modExp(alpha, xb, q);
+      
+      let KA = modExp(YB, xa, q);
+      let KB = modExp(YA, xb, q);
+
+      document.getElementById("output").innerHTML =
+      "Public Key of A: "+YA+"<br>"+
+      "Public Key of B: "+YB+"<br><br>"+
+      "Shared Secret Key (A): "+KA+"<br>"+
+      "Shared Secret Key (B): "+KB;
+    }
+    
+  </script>
+
+</body>
+</html>

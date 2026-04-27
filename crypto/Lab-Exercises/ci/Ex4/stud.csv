@@ -1,0 +1,9 @@
+Name,Department,ExperienceLevel,Teaches,Role
+Prof_A,ComputerScience,High,Yes,Professor
+Prof_B,Mathematics,High,Yes,Professor
+Prof_C,Physics,Low,Yes,Professor
+Prof_D,Chemistry,Medium,Yes,Professor
+Prof_E,ComputerScience,VeryHigh,Yes,Professor
+Stu_1,ComputerScience,Low,No,Student
+Stu_2,Mathematics,Low,No,Student
+Stu_3,Physics,Low,No,Student
